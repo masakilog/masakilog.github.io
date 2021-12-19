@@ -7,12 +7,77 @@
 
 </head>
 <body>
-  <input type="file" name="select" id="loadBtn" />
-  <div id="resulttable"></div>
-  <canvas id="myChart" width="200" height="100"></canvas>
+  <hr>
+  <input type="file" name="select" id="csv_upload" accept=".csv"/>
+  <button id="uploadconfirm">Upload</button>
+  <div class="chartBox">
+    <canvas id="myChart" width="200" height="100"></canvas>
+  </div>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.1/Chart.min.js"></script>
-  <script src="js/data.js"></script>
-  <script src="js/myChart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.3.1/papaparse.min.js"></script>
+  <script>
+    const dateData = [];
+    const followerData = [];
+    const uploadconfirm = document.getElementById("uploadconfirm").addEventListener('click',() =>{
+      Papa.parse(document.getElementById("csv_upload").files[0],
+      {
+        dwnload: true,
+        header: true,
+        skipEmptyLines: true,
+        complete: function(results){
+          for(i=0;i<results.data.length;i++){
+            dateData.push(results.data[i].date);
+            followerData.push(results.data[i].follower);
+          }
+        }
+      })
+      
+      // Setup block
+      const data = {
+        labels: ["12月1日","2日","3日","4日","5日","6日","7日","8日","9日","10日","11日","12日","13日","14日","15日","16日","17日","18日","19日","20日","21日","22日","23日","24日","26日","27日","28日","29日","30日","31日"] ,
+            datasets: [{
+                label: 'フォロワー数',
+                data: followerData,
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.2)',
+                    'rgba(54, 162, 235, 0.2)',
+                    'rgba(255, 206, 86, 0.2)',
+                    'rgba(75, 192, 192, 0.2)',
+                    'rgba(153, 102, 255, 0.2)',
+                    'rgba(255, 159, 64, 0.2)'
+                ],
+                borderColor: [
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 206, 86, 1)',
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(153, 102, 255, 1)',
+                    'rgba(255, 159, 64, 1)'
+                ],
+                borderWidth: 1
+            }]
+      };
+      // Config block
+      const config = {
+        type: 'line',
+        data,
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: false
+                }
+            }
+        }
+      }
+      console.log(followerData);
+      // Init Render block
+      const myChart = new Chart(
+        document.getElementById('myChart'),config
+      );
+  
+        console.log(myChart.data.datasets[0].data);
+    })
+  </script>
 </body>
 </html>
