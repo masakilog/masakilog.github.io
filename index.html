@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>分析ツール</title>
+
+</head>
+<body>
+  <input type="file" name="select" id="loadBtn" />
+  <div id="resulttable"></div>
+  <canvas id="myChart" width="200" height="100"></canvas>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.1/Chart.min.js"></script>
+  <script>
+    // 1: ボタンを取得してchangeイベントの設定
+var loadBtn = document.querySelector("#loadBtn");
+loadBtn.addEventListener("change", upload, false);
+
+function upload(event) {
+  // 2：chekFileReader関数でFileAPIにブラウザが対応してるかチェック
+  if (!checkFileReader()) {
+    alert("エラー：FileAPI非対応のブラウザです。");
+  } else {
+    // 3: 選択されたファイル情報を取得
+    var file = event.target.files[0];
+    var type = file.type; // MIMEタイプ
+    var size = file.size; // ファイル容量（byte）
+    var limit = 10000; // byte, 10KB
+
+    // MIMEタイプの判定
+    if (type == "image/jpeg") {
+      alert("画像はアップロードできません");
+      loadBtn.value="";
+      return;
+    }
+
+    //readerオブジェクトを作成
+    var reader = new FileReader();
+    // ファイル読み取りを実行
+    reader.readAsText(file);
+
+    // 4：CSVファイルを読み込む処理とエラー処理をする
+    reader.onload = function(event) {
+      var result = event.target.result;
+      makeCSV(result);
+    };
+
+    //読み込めなかった場合のエラー処理
+    reader.onerror = function() {
+      alert("エラー：ファイルをロードできません。");
+    };
+  }
+}
+
+//csvをうまく出力する
+function makeCSV(csvdata) {
+  //csvデータを1行ごとに配列にする
+  var tmp = csvdata.split("\n");
+
+  //csvデータをそのままtableで出力する
+  var tabledata = $("#resulttable");
+  var htmldata = "<table>";
+
+  //６：1行のデータから各項目（各列）のデータを取りだして、2次元配列にする
+  var data = [];
+  for (var i = 0; i < tmp.length; i++) {
+    //csvの1行のデータを取り出す
+    var row_data = tmp[i];
+
+    /*各行の列のデータを配列にする
+    data[
+        [1列目、2列目、3列目]　←1行目のデータ　
+        [1列目、2列目、3列目]　←2行目のデータ　
+        [1列目、2列目、3列目]　←3行目のデータ　
+        ]
+    */
+
+    data[i] = row_data.split(",");
+    //7：dataに入ってる各列のデータを出力する為のデータを作る
+    htmldata += "<tr>";
+    for (var j = 0; j < data[i].length; j++) {
+      //各行の列のデータを個別に出力する
+      htmldata += "<td>" + data[i][j] + "</td>";
+    }
+
+    htmldata += "</tr>";
+  }
+
+  // 8： データをWebページに出力する
+  htmldata += "</table>";
+  tabledata.append(htmldata);
+}
+// ファイルアップロード判定
+function checkFileReader() {
+  var isUse = false;
+  if (window.File && window.FileReader && window.FileList && window.Blob) {
+    isUse = true;
+  }
+  return isUse;
+}
+</script>
+  <script>
+    new Chart(document.getElementById("myChart"),{
+      "type":"line" // グラフのタイプとして折れ線グラフを指定
+      ,"data":{
+        "labels":["12月1日","2日","3日","4日","5日","6日","7日","8日","9日","10日","11日","12日","13日","14日","15日","16日","17日","18日","19日","20日","21日","22日","23日","24日","26日","27日","28日","29日","30日","31日"] //横軸の値
+        ,"datasets":[{
+          "label":"フォロワー数" //ラベル（グラフの説明などを記載）
+          ,"data":[0,2,4,8,16,19,20,25,29,31,36,50,66,83,102,120] //縦軸の値
+          ,"fill":false //折れ線グラフの下の領域を塗りつぶすフラグ（true：塗りつぶす、false：塗りつぶさない）
+          ,"borderColor":"rgb(75, 192, 192)" // グラフ色を指定
+          ,"lineTension":0.1 //グラフの滑らか具合を指定（値が大きいほど滑らか・丸っこいになる）
+        }]}
+      ,"options":{}
+    });
+  </script>
+</body>
+</html>
